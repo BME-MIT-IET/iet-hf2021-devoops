@@ -17,3 +17,6 @@ A kód debugolása közben arra juttottunk, hogy a hiba abban a kódrészben kel
 ![](../examples/noheader/exception.png)
 
 ## Hibás adat tesztelése
+
+A szándékosan hibás [csv fájl](../examples/wrongdata/wrongdata.csv) (hiányzó oszlopok az egyes rekordokban) esetén az elvárásoknak megfelelően ArrayIndexOutOfBoundsException-t kaptunk, de ennek ellenére létrejött az üres [kimeneti fájl](../examples/wrongdata/wrongdata.ttl).
+![](../examples/wrongdata/exception.png)
