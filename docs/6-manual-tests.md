@@ -25,3 +25,8 @@ A szándékosan hibás [csv fájl](../examples/wrongdata/wrongdata.csv) (hiányz
 
 Üres [input fájl](../examples/nodata/nodata.csv) esetén a program felismeri és jelzi a felhasználónak a problémát. A nullpointer exception mellett konkrét szöveges visszajelzést is kap a felhasználó. Ebben az esetben .ttl fájl sem készül. A kapcsolódó fájlok [ebben a mappában](../examples/nodata) találhatók.
 ![](../examples/nodata/nodata.png)
+
+## Rossz formátumú adat
+
+Ha az egyik szám érték helyett (amit dátumba helyettesít be) szöveget írunk be, azt nem detektálja. Az alább látható módon behelyettesíti a dátum helyére. Inputként ezt a [.csv](../examples/wrongFormat/wrongFormat.csv) fájlt használtuk.   
+![](../examples/wrongFormat/rdf.png)
