@@ -20,3 +20,8 @@ A kód debugolása közben arra juttottunk, hogy a hiba abban a kódrészben kel
 
 A szándékosan hibás [csv fájl](../examples/wrongdata/wrongdata.csv) (hiányzó oszlopok az egyes rekordokban) esetén az elvárásoknak megfelelően ArrayIndexOutOfBoundsException-t kaptunk, de ennek ellenére létrejött az üres [kimeneti fájl](../examples/wrongdata/wrongdata.ttl).
 ![](../examples/wrongdata/exception.png)
+
+## Üres input fájl tesztelése
+
+Üres [input fájl](../examples/nodata/nodata.csv) esetén a program felismeri és jelzi a felhasználónak a problémát. A nullpointer exception mellett konkrét szöveges visszajelzést is kap a felhasználó. Ebben az esetben .ttl fájl sem készül.
+![](../examples/nodata/nodata.png)
