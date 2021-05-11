@@ -2,11 +2,7 @@
 
 package com.complexible.common.csv;
 
-import io.airlift.command.Arguments;
-import io.airlift.command.Cli;
-import io.airlift.command.Command;
-import io.airlift.command.Help;
-import io.airlift.command.Option;
+
 
 import java.io.File;
 import java.io.Reader;
@@ -40,8 +36,11 @@ import org.openrdf.rio.RioSetting;
 import org.openrdf.rio.helpers.BasicParserSettings;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 
-import au.com.bytecode.opencsv.CSVReader;
-
+import com.github.rvesse.airline.Cli;
+import com.github.rvesse.airline.annotations.Arguments;
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.help.Help;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -51,6 +50,8 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Converts a CSV file to RDF based on a given template
@@ -75,7 +76,7 @@ public class CSV2RDF implements Runnable {
 	@Option(name = { "-e", "--escape" }, description = "Escape character used in the csv file or '\\' by default.")
 	String escape = String.valueOf(CSVReader.DEFAULT_ESCAPE_CHARACTER);
 
-	@Arguments(required = true, description = "File arguments. The extension of template file and output file determines the RDF format that will be used for them (.ttl = Turtle, .nt = N-Triples, .rdf = RDF/XML)", title = {
+	@Arguments(description = "File arguments. The extension of template file and output file determines the RDF format that will be used for them (.ttl = Turtle, .nt = N-Triples, .rdf = RDF/XML)", title = {
 	                "templateFile", "csvFile", "outputFile" })
 	public List<String> files;
 	private int inputRows = 0;
