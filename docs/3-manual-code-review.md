@@ -8,7 +8,7 @@ Először ellenőrzi a bemeneti paraméterek helyességét, beolvassa a bementi 
 ### insertPlaceholders függvény
 A template fájlban megkeresi egy regex segítségével a placeholdereket, ahova majd behelyettesíti az rdf állítás egyes részeit.
 ### parseTemplate
-Ez a függvény hívódik a konstruktorban. Egy RDF handler segédosztályt hoz létre, amiben az rdf adatbázishoz szükséges namespace-eket is kezeli, valamint összeállítja az rdf állításokat a value- és a statementgenerator segítségével. Ezenkívül a lentebb definiált osztályok segítségével feldolgozza a template-et.
+Ez a függvény hívódik meg a konstruktorban. Egy RDF handler segédosztályt hoz létre, amiben az rdf adatbázishoz szükséges namespace-eket is kezeli, valamint összeállítja az rdf állításokat a value- és a statementgenerator segítségével. Ezenkívül a lentebb definiált osztályok segítségével feldolgozza a template-et.
 ### valueProviderFor függvény
 A template fájl alapján eldönti, hogy milyen valueProvider-re lesz szükség. Ezt hívja meg az insertPlaceholders.
 ## A StatementGenerator osztály
