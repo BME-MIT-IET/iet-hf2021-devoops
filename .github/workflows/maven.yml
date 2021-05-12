@@ -20,11 +20,10 @@ jobs:
         with:
           java-version: "11"
           distribution: "adopt"
-      - name: Maven Mirror
-        inputs:
-          inputId: clojars.org
-          inputName: clojars.org
-          inputUrl: http://clojars.org/repo
-          inputMirrorOf: clojars # e.g. central, or *
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v14
+        with:
+          repositories: '[{ "id": "clojars.org", "url": "http://clojars.org/repo" }]'
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml
