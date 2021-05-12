@@ -7,10 +7,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<repositories>
-		<!-- <repository> <releases> <enabled>true</enabled> </releases> <snapshots> 
-			<enabled>false</enabled> </snapshots> <id>aduna-opensource.releases</id> 
-			<name>Aduna Open Source - Maven releases</name> <url>http://repo.aduna-software.org/maven2/releases</url> 
-			</repository> -->
 		<repository>
 			<id>clojars.org</id>
 			<url>http://clojars.org/repo</url>

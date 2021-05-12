@@ -26,4 +26,4 @@ jobs:
           repositories: '[{ "id": "clojars.org", "url": "http://clojars.org/repo" }]'
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -U -B package --file pom.xml
