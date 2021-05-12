@@ -20,10 +20,5 @@ jobs:
         with:
           java-version: "11"
           distribution: "adopt"
-      - name: maven-settings-xml-action
-        uses: whelk-io/maven-settings-xml-action@v14
-        with:
-          repositories: '[{ "id": "clojars.org", "url": "http://clojars.org/repo" }]'
-
       - name: Build with Maven
         run: mvn -U -B package --file pom.xml
