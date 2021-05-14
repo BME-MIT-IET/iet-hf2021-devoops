@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - 4-static-code-analysis
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
