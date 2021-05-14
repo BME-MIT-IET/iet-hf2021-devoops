@@ -6,12 +6,9 @@ name: Java CI with Maven
 on:
   push:
     branches:
-      - main
-      - 4-static-code-analysis
+      - master
   pull_request:
-    branches:
-      - main
-      - 4-static-code-analysis
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
