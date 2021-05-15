@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,7 +69,8 @@ public class CSV2RDF implements Runnable {
 	private static final Charset INPUT_CHARSET = Charset.defaultCharset();
 	private static final Charset OUTPUT_CHARSET = StandardCharsets.UTF_8;
 	private static final ValueFactory FACTORY = ValueFactoryImpl.getInstance();
-	private static PrintStream stream = new PrintStream(System.out);
+	private static PrintStream errorstream = new PrintStream(System.err);
+	private static Logger logger = Logger.getLogger(CSV2RDF.class.getName());
 
 	@Option(name = "--no-header", arity = 0, description = "If csv file does not contain a header row")
 	boolean noHeader = false;
@@ -94,24 +97,23 @@ public class CSV2RDF implements Runnable {
 		File templateFile = new File(files.get(0));
 		File inputFile = new File(files.get(1));
 		File outputFile =  new File(files.get(2));
-		stream.println("CSV to RDF conversion started...");
-		stream.println("Template: " + templateFile);
-		stream.println("Input   : " + inputFile);
-		stream.println("Output  : " + outputFile);
+		logger.fine("CSV to RDF conversion started...");
+		String msg1 = String.format("Template: %s", templateFile.getName());
+		String msg2 = String.format("Input   : %s", inputFile);
+		String msg3 = String.format("Output  : %s", outputFile);
+		logger.fine(msg1);
+		logger.fine(msg2);
+		logger.fine(msg3);
 		
-		Reader in;
-		CSVReader reader;
-		Writer out;
-		RDFWriter writer;
-		try {
-			in = Files.newReader(inputFile, INPUT_CHARSET);
-			reader = new CSVReader(in, toChar(separator), toChar(quote), toChar(escape));
+		try(Reader in = Files.newReader(inputFile, INPUT_CHARSET);
+			CSVReader reader = new CSVReader(in, toChar(separator), toChar(quote), toChar(escape));
+			Writer out = Files.newWriter(outputFile, OUTPUT_CHARSET);)
+		{
+
+			RDFWriter writer = Rio.createWriter(RDFFormat.forFileName(outputFile.getName(), RDFFormat.TURTLE), out);
 			String[] row = reader.readNext();
 
 			Preconditions.checkNotNull(row, "Input file is empty!");
-
-			out = Files.newWriter(outputFile, OUTPUT_CHARSET);
-			writer = Rio.createWriter(RDFFormat.forFileName(outputFile.getName(), RDFFormat.TURTLE), out);
 
 			Template template = new Template(Arrays.asList(row), templateFile, writer);
 
@@ -123,18 +125,13 @@ public class CSV2RDF implements Runnable {
 				template.generate(row, writer);
 			}
 
+			writer.endRDF();
 
 		}
 		catch (IOException|RDFHandlerException|RDFParseException e) {
-			System.err.println("ERROR: " + e.getMessage());
+			errorstream.println("ERROR: " + e.getMessage());
 			e.printStackTrace();
 			throw e;
-		} finally {
-			writer.endRDF();
-
-			reader.close();
-			in.close();
-			out.close();
 		}
 		stream.printf("Converted %,d rows to %,d triples%n", inputRows, outputTriples);
 	}
@@ -450,7 +447,7 @@ public class CSV2RDF implements Runnable {
 			                .build().parse(args).run();
 		}
 		catch (Exception e) {
-			System.err.println("ERROR: " + e.getMessage());
+			errorstream.println("ERROR: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
