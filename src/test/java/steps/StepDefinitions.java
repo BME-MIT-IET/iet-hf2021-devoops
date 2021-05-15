@@ -90,7 +90,6 @@ public class StepDefinitions {
     @Then("I get an empty file")
     public void i_get_an_empty_file() throws IOException {
         Path path = Paths.get("src/test/resources/testDump/cars.ttl");
-        Path pathEmpty = Paths.get("examples/nodata/nodata.csv");
         assertEquals(0, Files.size(path));
     }
 
