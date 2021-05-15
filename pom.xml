@@ -6,7 +6,9 @@
     <version>0.0.2-SNAPSHOT</version>
 
     <properties>
-        <sonar.test.exclusions>**/test/*</sonar.test.exclusions>
+        <sonar.sources>.</sonar.sources>
+        <sonar.inclusions>src/main/**</sonar.inclusions>
+        <sonar.exclusions>**/test/*</sonar.exclusions>
         <sonar.projectKey>BME-MIT-IET_iet-hf2021-devoops</sonar.projectKey>
         <sonar.organization>bme-mit-iet-org</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
