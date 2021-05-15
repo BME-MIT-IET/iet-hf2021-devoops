@@ -13,11 +13,9 @@ Feature: Basic file conversion
   Scenario: Not enough arguments
     Given I have a default csv
     When I give 2 arguments
-    Then I receive an error
+    Then I do not get new file
 
   Scenario: Too many arguments
     Given I have a default csv
     When I give 4 arguments
-    Then I receive an error
-
-#java -jar target/csv2rdf-0.0.1-SNAPSHOT.jar examples/cars/template.ttl examples/cars/cars.csv cars.ttl
+    Then I do not get new file
