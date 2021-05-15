@@ -126,7 +126,6 @@ public class CSV2RDF implements Runnable {
 		}
 		catch (IOException|RDFHandlerException|RDFParseException e) {
 			logger.warning("ERROR: " + e.getMessage());
-			e.printStackTrace();
 		}
 		String msg4 = String.format("Converted %,d rows to %,d triples%n", inputRows, outputTriples);
 		logger.fine(msg4);
@@ -312,7 +311,7 @@ public class CSV2RDF implements Runnable {
 		public String provide(int rowIndex, String[] row) {
 			 String value = provideValue(rowIndex, row);
 			 if (value != null && isHash) {
-				HashCode hash = Hashing.sha1().hashString(value, OUTPUT_CHARSET);
+				HashCode hash = Hashing.sha512().hashString(value, OUTPUT_CHARSET);
 				value = BaseEncoding.base32Hex().omitPadding().lowerCase().encode(hash.asBytes());
 			 }
 			 return value;
@@ -444,7 +443,6 @@ public class CSV2RDF implements Runnable {
 		}
 		catch (Exception e) {
 			logger.warning("ERROR: " + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 }
