@@ -415,7 +415,7 @@ public class CSV2RDF implements Runnable {
 
 			this.datatype = literal.getDatatype();
 			this.lang = literal.getLanguage();
-		}
+		} 
 
 		public Literal generate(int rowIndex, String[] row) {
 			String value = applyTemplate(rowIndex, row);
