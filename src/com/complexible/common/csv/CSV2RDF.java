@@ -5,9 +5,7 @@ package com.complexible.common.csv;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,7 +66,6 @@ public class CSV2RDF implements Runnable {
 	private static final Charset INPUT_CHARSET = Charset.defaultCharset();
 	private static final Charset OUTPUT_CHARSET = StandardCharsets.UTF_8;
 	private static final ValueFactory FACTORY = ValueFactoryImpl.getInstance();
-	private static PrintStream errorstream = new PrintStream(System.err);
 	private static Logger logger = Logger.getLogger(CSV2RDF.class.getName());
 
 	@Option(name = "--no-header", arity = 0, description = "If csv file does not contain a header row")
@@ -129,11 +125,11 @@ public class CSV2RDF implements Runnable {
 
 		}
 		catch (IOException|RDFHandlerException|RDFParseException e) {
-			errorstream.println("ERROR: " + e.getMessage());
+			logger.warning("ERROR: " + e.getMessage());
 			e.printStackTrace();
-			throw e;
 		}
-		stream.printf("Converted %,d rows to %,d triples%n", inputRows, outputTriples);
+		String msg4 = String.format("Converted %,d rows to %,d triples%n", inputRows, outputTriples);
+		logger.fine(msg4);
 	}
 
 	private static char toChar(String value) {
@@ -447,7 +443,7 @@ public class CSV2RDF implements Runnable {
 			                .build().parse(args).run();
 		}
 		catch (Exception e) {
-			errorstream.println("ERROR: " + e.getMessage());
+			logger.warning("ERROR: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
