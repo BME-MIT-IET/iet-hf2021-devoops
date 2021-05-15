@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
       - 4-static-code-analysis
   pull_request:
     types: [opened, synchronize, reopened]
