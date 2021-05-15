@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>csv2rdf</groupId>
     <artifactId>csv2rdf</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
 
     <properties>
         <sonar.projectKey>BME-MIT-IET_iet-hf2021-devoops</sonar.projectKey>
