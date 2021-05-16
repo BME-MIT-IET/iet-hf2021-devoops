@@ -1,6 +1,6 @@
 // Copyright (c) 2014, Clark & Parsia, LLC. <http://www.clarkparsia.com>
 
-package com.complexible.common.csv;
+package main.java.com.complexible.common.csv;
 
 
 
