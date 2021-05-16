@@ -5,15 +5,18 @@ package main.java.com.complexible.common.csv;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +32,7 @@ import org.openrdf.rio.ParserConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.Rio;
@@ -41,7 +45,6 @@ import com.github.rvesse.airline.annotations.Arguments;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.help.Help;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -61,8 +64,9 @@ import au.com.bytecode.opencsv.CSVReader;
 @Command(name = "convert", description = "Runs the conversion.")
 public class CSV2RDF implements Runnable {
 	private static final Charset INPUT_CHARSET = Charset.defaultCharset();
-	private static final Charset OUTPUT_CHARSET = Charsets.UTF_8;
+	private static final Charset OUTPUT_CHARSET = StandardCharsets.UTF_8;
 	private static final ValueFactory FACTORY = ValueFactoryImpl.getInstance();
+	private static Logger logger = Logger.getLogger(CSV2RDF.class.getName());
 
 	@Option(name = "--no-header", arity = 0, description = "If csv file does not contain a header row")
 	boolean noHeader = false;
@@ -89,20 +93,23 @@ public class CSV2RDF implements Runnable {
 		File templateFile = new File(files.get(0));
 		File inputFile = new File(files.get(1));
 		File outputFile =  new File(files.get(2));
-		System.out.println("CSV to RDF conversion started...");
-		System.out.println("Template: " + templateFile);
-		System.out.println("Input   : " + inputFile);
-		System.out.println("Output  : " + outputFile);
+		logger.fine("CSV to RDF conversion started...");
+		String msg1 = String.format("Template: %s", templateFile.getName());
+		String msg2 = String.format("Input   : %s", inputFile);
+		String msg3 = String.format("Output  : %s", outputFile);
+		logger.fine(msg1);
+		logger.fine(msg2);
+		logger.fine(msg3);
 		
-		try {
-			Reader in = Files.newReader(inputFile, INPUT_CHARSET);
+		try(Reader in = Files.newReader(inputFile, INPUT_CHARSET);
 			CSVReader reader = new CSVReader(in, toChar(separator), toChar(quote), toChar(escape));
+			Writer out = Files.newWriter(outputFile, OUTPUT_CHARSET);)
+		{
+
+			RDFWriter writer = Rio.createWriter(RDFFormat.forFileName(outputFile.getName(), RDFFormat.TURTLE), out);
 			String[] row = reader.readNext();
 
 			Preconditions.checkNotNull(row, "Input file is empty!");
-
-			Writer out = Files.newWriter(outputFile, OUTPUT_CHARSET);
-			RDFWriter writer = Rio.createWriter(RDFFormat.forFileName(outputFile.getName(), RDFFormat.TURTLE), out);
 
 			Template template = new Template(Arrays.asList(row), templateFile, writer);
 
@@ -116,14 +123,12 @@ public class CSV2RDF implements Runnable {
 
 			writer.endRDF();
 
-			reader.close();
-			in.close();
-			out.close();
 		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
+		catch (IOException|RDFHandlerException|RDFParseException e) {
+			logger.warning("ERROR: " + e.getMessage());
 		}
-		System.out.printf("Converted %,d rows to %,d triples%n", inputRows, outputTriples);
+		String msg4 = String.format("Converted %,d rows to %,d triples%n", inputRows, outputTriples);
+		logger.fine(msg4);
 	}
 
 	private static char toChar(String value) {
@@ -152,21 +157,21 @@ public class CSV2RDF implements Runnable {
 		private List<StatementGenerator> stmts = Lists.newArrayList();
 		private List<ValueProvider> valueProviders = Lists.newArrayList();
 
-		Template(List<String> cols, File templateFile, RDFWriter writer) throws Exception {
+		Template(List<String> cols, File templateFile, RDFWriter writer) throws RDFParseException, RDFHandlerException, IOException {
 			parseTemplate(cols, templateFile, writer);
 		}
 
-		private String insertPlaceholders(List<String> cols, File templateFile) throws Exception {
+		private String insertPlaceholders(List<String> cols, File templateFile) throws IOException{
 			Pattern p = Pattern.compile("([\\$|\\#]\\{[^}]*\\})");
 
 			Matcher m = p.matcher(Files.toString(templateFile, INPUT_CHARSET));
 			StringBuffer sb = new StringBuffer();
 			while (m.find()) {
-				String var = m.group(1);
-				String varName = var.substring(2, var.length() - 1);
+				String templatevar = m.group(1);
+				String varName = templatevar.substring(2, templatevar.length() - 1);
 				ValueProvider valueProvider = valueProviderFor(varName, cols);
-				Preconditions.checkArgument(valueProvider != null, "Invalid template variable", var);
-				valueProvider.isHash = (var.charAt(0) == '#');
+				Preconditions.checkArgument(valueProvider != null, "Invalid template variable", templatevar);
+				valueProvider.isHash = (templatevar.charAt(0) == '#');
 				m.appendReplacement(sb, valueProvider.placeholder);
 				valueProviders.add(valueProvider);
 			}
@@ -175,7 +180,7 @@ public class CSV2RDF implements Runnable {
 			return sb.toString();
 		}
 
-		private ValueProvider valueProviderFor(String varName, List<String> cols) throws Exception {
+		private ValueProvider valueProviderFor(String varName, List<String> cols) throws ClassCastException {
 			if (varName.equalsIgnoreCase("_ROW_")) {
 				return new RowNumberProvider(); 
 			}
@@ -203,7 +208,7 @@ public class CSV2RDF implements Runnable {
 			return index == -1 ? null : new RowValueProvider(index);
 		}
 
-		private void parseTemplate(List<String> cols, File templateFile, final RDFWriter writer) throws Exception {
+		private void parseTemplate(List<String> cols, File templateFile, final RDFWriter writer) throws IOException, RDFParseException, RDFHandlerException {
 			String templateStr = insertPlaceholders(cols, templateFile);
 
 			RDFParser parser = Rio.createParser(RDFFormat.forFileName(templateFile.getName()));
@@ -299,14 +304,14 @@ public class CSV2RDF implements Runnable {
 		}
 	}
 
-	private static abstract class ValueProvider {
+	private abstract static class ValueProvider {
 		 private final String placeholder = UUID.randomUUID().toString();
 		 private boolean isHash;
 
 		public String provide(int rowIndex, String[] row) {
 			 String value = provideValue(rowIndex, row);
 			 if (value != null && isHash) {
-				HashCode hash = Hashing.sha1().hashString(value, OUTPUT_CHARSET);
+				HashCode hash = Hashing.sha512().hashString(value, OUTPUT_CHARSET);
 				value = BaseEncoding.base32Hex().omitPadding().lowerCase().encode(hash.asBytes());
 			 }
 			 return value;
@@ -375,7 +380,7 @@ public class CSV2RDF implements Runnable {
 		}
 	}
 
-	private static abstract class TemplateValueGenerator<V extends Value> implements ValueGenerator<V> {
+	private abstract static class TemplateValueGenerator<V extends Value> implements ValueGenerator<V> {
 		private final String template;
 		private final ValueProvider[] providers;
 
@@ -415,24 +420,29 @@ public class CSV2RDF implements Runnable {
 
 			this.datatype = literal.getDatatype();
 			this.lang = literal.getLanguage();
-		}
+		} 
 
 		public Literal generate(int rowIndex, String[] row) {
 			String value = applyTemplate(rowIndex, row);
-			return datatype == null ? lang == null ? FACTORY.createLiteral(value) : FACTORY.createLiteral(value, lang)
-			                : FACTORY.createLiteral(value, datatype);
+
+			if (datatype == null) {
+				if(lang == null) {
+					return FACTORY.createLiteral(value);
+				}
+				return FACTORY.createLiteral(value, lang);
+			}
+			return FACTORY.createLiteral(value, datatype);
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		try {
 			Cli.<Runnable> builder("csv2rdf").withDescription("Converts a CSV file to RDF based on a given template")
 			                .withDefaultCommand(CSV2RDF.class).withCommand(CSV2RDF.class).withCommand(Help.class)
 			                .build().parse(args).run();
 		}
 		catch (Exception e) {
-			System.err.println("ERROR: " + e.getMessage());
-			e.printStackTrace();
+			logger.warning("ERROR: " + e.getMessage());
 		}
 	}
 }
